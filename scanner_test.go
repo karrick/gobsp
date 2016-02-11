@@ -32,10 +32,6 @@ func TestBinaryScannerEOF(t *testing.T) {
 }
 
 func TestBinaryScannerHandleReturnsHandlerError(t *testing.T) {
-	bb := bytes.NewBuffer([]byte{
-		0x00, 0x00, 0x01, 0x00,
-	})
-
 	handlers := map[uint32]MessageHandler{
 		0x00: func(io.Reader) error {
 			return io.EOF
@@ -44,6 +40,10 @@ func TestBinaryScannerHandleReturnsHandlerError(t *testing.T) {
 			return nil
 		},
 	}
+
+	bb := bytes.NewBuffer([]byte{
+		0x00, 0x00, 0x01, 0x00,
+	})
 
 	scanner := NewScanner(bb, handlers)
 
@@ -55,30 +55,30 @@ func TestBinaryScannerHandleReturnsHandlerError(t *testing.T) {
 	ensure(t, scanner.Err(), nil)
 }
 
-func TestBinaryScanner(t *testing.T) {
-	t.Skip()
-
-	bb := bytes.NewBuffer([]byte{
-		0x00, 0x00, 0x01, 0x00,
-	})
-
+func TestBinaryScannerHandleErrUnknownMessageTypeSkipsBadMessage(t *testing.T) {
 	handlers := map[uint32]MessageHandler{
 		0x00: func(ior io.Reader) error {
-			return io.EOF
-		},
-		0x01: func(ior io.Reader) error {
 			return nil
 		},
 	}
 
+	bb := bytes.NewBuffer([]byte{
+		0x00, 0x00, // normal message
+		0x01, 0x04, 0xDE, 0xAD, 0xBE, 0xEF, // unknown message and payload
+		0x00, 0x00, // normal message to ensure it keeps going
+	})
+
 	scanner := NewScanner(bb, handlers)
 
-	for scanner.Scan() {
-		if err := scanner.Handle(); err != nil {
-			t.Error(err)
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		t.Error(err)
-	}
+	ensure(t, scanner.Scan(), true)
+	ensure(t, scanner.Handle(), nil)
+	ensure(t, scanner.Scan(), true)
+
+	// expect ErrUnknownMessageType, and consume unknown message
+	ensure(t, scanner.Handle(), ErrUnknownMessageType(0x01))
+
+	ensure(t, scanner.Scan(), true)
+	ensure(t, scanner.Handle(), nil)
+	ensure(t, scanner.Scan(), false)
+	ensure(t, scanner.Err(), nil)
 }
