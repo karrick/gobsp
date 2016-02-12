@@ -238,32 +238,23 @@ func TestBinaryFLOAT64Codec(t *testing.T) {
 ////////////////////////////////////////
 
 func testVWICodec(t *testing.T, value uint64, buf []byte) {
-	testVWIEncode(t, value, buf)
-	testVWIDecode(t, value, buf)
-}
-
-func testVWIEncode(t *testing.T, value uint64, buf []byte) {
-	v := VWI(value)
+	vin := VWI(value)
+	var vout VWI
 	bb := new(bytes.Buffer)
 
-	if err := v.MarshalBinaryTo(bb); err != nil {
+	if err := vin.MarshalBinaryTo(bb); err != nil {
 		t.Error(err)
 	}
 
 	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
-}
 
-func testVWIDecode(t *testing.T, value uint64, buf []byte) {
-	bb := bytes.NewBuffer(buf)
-	var v VWI
-
-	if err := v.UnmarshalBinaryFrom(bb); err != nil {
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
 		t.Error(err)
 	}
 
-	if actual, expected := v, VWI(value); actual != expected {
+	if actual, expected := vout, VWI(value); actual != expected {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
 }
@@ -285,15 +276,18 @@ func TestBinaryVWICodecTwoBytes(t *testing.T) {
 
 ////////////////////////////////////////
 
-func testStringCodec(t *testing.T, value string) {
+func testStringCodec(t *testing.T, value string, buf []byte) {
 	vin := String(value)
+	var vout String
 	bb := new(bytes.Buffer)
 
 	if err := vin.MarshalBinaryTo(bb); err != nil {
 		t.Fatal(err)
 	}
 
-	var vout String
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
 
 	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
 		t.Fatal(err)
@@ -305,22 +299,26 @@ func testStringCodec(t *testing.T, value string) {
 }
 
 func TestBinaryStringCodec(t *testing.T) {
-	testStringCodec(t, "")
-	testStringCodec(t, "short")
-	testStringCodec(t, "this is a slightly longer message")
+	testStringCodec(t, "", []byte{0x0})
+	testStringCodec(t, "short", []byte{0x05, 's', 'h', 'o', 'r', 't'})
+	testStringCodec(t, "this is a slightly longer message",
+		append([]byte{0x21}, []byte("this is a slightly longer message")...))
 }
 
 ////////////////////////////////////////
 
-func testStringSliceCodec(t *testing.T, value []String) {
+func testStringSliceCodec(t *testing.T, value []String, buf []byte) {
 	vin := StringSlice(value)
+	var vout StringSlice
 	bb := new(bytes.Buffer)
 
 	if err := vin.MarshalBinaryTo(bb); err != nil {
 		t.Fatal(err)
 	}
 
-	var vout StringSlice
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
 
 	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
 		t.Fatal(err)
@@ -337,7 +335,13 @@ func testStringSliceCodec(t *testing.T, value []String) {
 }
 
 func TestBinaryStringSliceCodec(t *testing.T) {
-	testStringSliceCodec(t, StringSlice{})
-	testStringSliceCodec(t, StringSlice{String("one")})
-	testStringSliceCodec(t, StringSlice{String("one"), String("two")})
+	testStringSliceCodec(t, StringSlice{}, []byte{0x0})
+	testStringSliceCodec(t, StringSlice{String("one")},
+		append([]byte{0x1, 0x3}, []byte("one")...))
+	testStringSliceCodec(t, StringSlice{String("one"), String("two")},
+		[]byte{
+			0x2,
+			0x3, 'o', 'n', 'e',
+			0x3, 't', 'w', 'o',
+		})
 }
