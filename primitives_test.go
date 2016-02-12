@@ -6,132 +6,233 @@ import (
 	"testing"
 )
 
-func testUINT32Codec(t *testing.T, value uint64, buf []byte) {
-	testUINT32Encode(t, value, buf)
-	testUINT32Decode(t, value, buf)
-}
+////////////////////////////////////////
 
-func testUINT32Encode(t *testing.T, value uint64, buf []byte) {
-	v := Uint32(value)
+func testUint8(t *testing.T, value uint64, buf []byte) {
+	vin := Uint8(value)
+	var vout Uint8
 	bb := new(bytes.Buffer)
 
-	if err := v.MarshalBinaryTo(bb); err != nil {
+	if err := vin.MarshalBinaryTo(bb); err != nil {
 		t.Error(err)
 	}
 
 	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
-}
 
-func testUINT32Decode(t *testing.T, value uint64, buf []byte) {
-	bb := bytes.NewBuffer(buf)
-	var v Uint32
-
-	if err := v.UnmarshalBinaryFrom(bb); err != nil {
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
 		t.Error(err)
 	}
 
-	if actual, expected := v, Uint32(value); actual != expected {
+	if actual, expected := vout, Uint8(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryUINT8Codec(t *testing.T) {
+	testUint8(t, 0, []byte{0x00})
+	testUint8(t, 1, []byte{0x01})
+	testUint8(t, 2, []byte{0x02})
+	testUint8(t, 127, []byte{0x7f})
+	testUint8(t, 128, []byte{0x80})
+	testUint8(t, 129, []byte{0x81})
+	testUint8(t, 254, []byte{0xfe})
+	testUint8(t, 255, []byte{0xff})
+}
+
+////////////////////////////////////////
+
+func testUint16(t *testing.T, value uint64, buf []byte) {
+	vin := Uint16(value)
+	var vout Uint16
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Uint16(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryUINT16Codec(t *testing.T) {
+	testUint16(t, 0, []byte{0x00, 0x00})
+	testUint16(t, 1, []byte{0x00, 0x01})
+	testUint16(t, 2, []byte{0x00, 0x02})
+	testUint16(t, 127, []byte{0x00, 0x7f})
+	testUint16(t, 128, []byte{0x00, 0x80})
+	testUint16(t, 129, []byte{0x00, 0x81})
+	testUint16(t, 16383, []byte{0x3f, 0xff})
+	testUint16(t, 16384, []byte{0x40, 0x00})
+	testUint16(t, 16385, []byte{0x40, 0x01})
+}
+
+////////////////////////////////////////
+
+func testUint32(t *testing.T, value uint64, buf []byte) {
+	vin := Uint32(value)
+	var vout Uint32
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Uint32(value); actual != expected {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
 }
 
 func TestBinaryUINT32Codec(t *testing.T) {
-	testUINT32Codec(t, 0, []byte{0x00, 0x00, 0x00, 0x00})
-	testUINT32Codec(t, 1, []byte{0x00, 0x00, 0x00, 0x01})
-	testUINT32Codec(t, 2, []byte{0x00, 0x00, 0x00, 0x02})
-	testUINT32Codec(t, 127, []byte{0x00, 0x00, 0x00, 0x7f})
-	testUINT32Codec(t, 128, []byte{0x00, 0x00, 0x00, 0x80})
-	testUINT32Codec(t, 129, []byte{0x00, 0x00, 0x00, 0x81})
-	testUINT32Codec(t, 16383, []byte{0x00, 0x00, 0x3f, 0xff})
-	testUINT32Codec(t, 16384, []byte{0x00, 0x00, 0x40, 0x00})
-	testUINT32Codec(t, 16385, []byte{0x00, 0x00, 0x40, 0x01})
+	testUint32(t, 0, []byte{0x00, 0x00, 0x00, 0x00})
+	testUint32(t, 1, []byte{0x00, 0x00, 0x00, 0x01})
+	testUint32(t, 2, []byte{0x00, 0x00, 0x00, 0x02})
+	testUint32(t, 127, []byte{0x00, 0x00, 0x00, 0x7f})
+	testUint32(t, 128, []byte{0x00, 0x00, 0x00, 0x80})
+	testUint32(t, 129, []byte{0x00, 0x00, 0x00, 0x81})
+	testUint32(t, 16383, []byte{0x00, 0x00, 0x3f, 0xff})
+	testUint32(t, 16384, []byte{0x00, 0x00, 0x40, 0x00})
+	testUint32(t, 16385, []byte{0x00, 0x00, 0x40, 0x01})
 }
 
 ////////////////////////////////////////
 
-func testUINT64Codec(t *testing.T, value uint64, buf []byte) {
-	testUINT64Encode(t, value, buf)
-	testUINT64Decode(t, value, buf)
-}
-
-func testUINT64Encode(t *testing.T, value uint64, buf []byte) {
-	v := Uint64(value)
+func testUint64(t *testing.T, value uint64, buf []byte) {
+	vin := Uint64(value)
+	var vout Uint64
 	bb := new(bytes.Buffer)
 
-	if err := v.MarshalBinaryTo(bb); err != nil {
+	if err := vin.MarshalBinaryTo(bb); err != nil {
 		t.Error(err)
 	}
 
 	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
-}
 
-func testUINT64Decode(t *testing.T, value uint64, buf []byte) {
-	bb := bytes.NewBuffer(buf)
-	var v Uint64
-
-	if err := v.UnmarshalBinaryFrom(bb); err != nil {
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
 		t.Error(err)
 	}
 
-	if actual, expected := v, Uint64(value); actual != expected {
+	if actual, expected := vout, Uint64(value); actual != expected {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
 }
 
 func TestBinaryUINT64Codec(t *testing.T) {
-	testUINT64Codec(t, 0, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-	testUINT64Codec(t, 1, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
-	testUINT64Codec(t, 2, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02})
-	testUINT64Codec(t, 127, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f})
-	testUINT64Codec(t, 128, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80})
-	testUINT64Codec(t, 129, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81})
-	testUINT64Codec(t, 16383, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff})
-	testUINT64Codec(t, 16384, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00})
-	testUINT64Codec(t, 16385, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01})
+	testUint64(t, 0, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+	testUint64(t, 1, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
+	testUint64(t, 2, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02})
+	testUint64(t, 127, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f})
+	testUint64(t, 128, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80})
+	testUint64(t, 129, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81})
+	testUint64(t, 16383, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff})
+	testUint64(t, 16384, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00})
+	testUint64(t, 16385, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01})
 }
 
 ////////////////////////////////////////
 
-func testFLOAT64Codec(t *testing.T, value float64) {
-	vin := Float64(value)
+func testFloat32(t *testing.T, value float64, buf []byte) {
+	vin := Float32(value)
+	var vout Float32
 	bb := new(bytes.Buffer)
 
 	if err := vin.MarshalBinaryTo(bb); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
-	var vout Float64
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
 
 	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
-	if actual, expected := float64(vout), value; actual != expected {
+	if actual, expected := vout, Float32(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryFLOAT32Codec(t *testing.T) {
+	testFloat32(t, math.SmallestNonzeroFloat32, []byte{0x0, 0x0, 0x0, 0x1})
+	testFloat32(t, math.MaxFloat32, []byte{0x7f, 0x7f, 0xff, 0xff})
+
+	testFloat32(t, math.Sqrt2, []byte{0x3f, 0xb5, 0x4, 0xf3})
+	testFloat32(t, math.SqrtE, []byte{0x3f, 0xd3, 0x9, 0x4c})
+	testFloat32(t, math.SqrtPi, []byte{0x3f, 0xe2, 0xdf, 0xc5})
+	testFloat32(t, math.SqrtPhi, []byte{0x3f, 0xa2, 0xd1, 0x8a})
+
+	testFloat32(t, math.Ln2, []byte{0x3f, 0x31, 0x72, 0x18})
+	testFloat32(t, math.Log2E, []byte{0x3f, 0xb8, 0xaa, 0x3b})
+	testFloat32(t, math.Ln10, []byte{0x40, 0x13, 0x5d, 0x8e})
+	testFloat32(t, math.Log10E, []byte{0x3e, 0xde, 0x5b, 0xd9})
+
+	testFloat32(t, math.E, []byte{0x40, 0x2d, 0xf8, 0x54})
+	testFloat32(t, math.Phi, []byte{0x3f, 0xcf, 0x1b, 0xbd})
+	testFloat32(t, math.Pi, []byte{0x40, 0x49, 0xf, 0xdb})
+}
+
+////////////////////////////////////////
+
+func testFloat64(t *testing.T, value float64, buf []byte) {
+	vin := Float64(value)
+	var vout Float64
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Float64(value); actual != expected {
 		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
 	}
 }
 
 func TestBinaryFLOAT64Codec(t *testing.T) {
-	testFLOAT64Codec(t, math.SmallestNonzeroFloat64)
-	testFLOAT64Codec(t, math.MaxFloat64)
+	testFloat64(t, math.SmallestNonzeroFloat64, []byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1})
+	testFloat64(t, math.MaxFloat64, []byte{0x7f, 0xef, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
 
-	testFLOAT64Codec(t, math.Sqrt2)
-	testFLOAT64Codec(t, math.SqrtE)
-	testFLOAT64Codec(t, math.SqrtPi)
-	testFLOAT64Codec(t, math.SqrtPhi)
+	testFloat64(t, math.Sqrt2, []byte{0x3f, 0xf6, 0xa0, 0x9e, 0x66, 0x7f, 0x3b, 0xcd})
+	testFloat64(t, math.SqrtE, []byte{0x3f, 0xfa, 0x61, 0x29, 0x8e, 0x1e, 0x6, 0x9c})
+	testFloat64(t, math.SqrtPi, []byte{0x3f, 0xfc, 0x5b, 0xf8, 0x91, 0xb4, 0xef, 0x6b})
+	testFloat64(t, math.SqrtPhi, []byte{0x3f, 0xf4, 0x5a, 0x31, 0x46, 0xa8, 0x84, 0x56})
 
-	testFLOAT64Codec(t, math.Ln2)
-	testFLOAT64Codec(t, math.Log2E)
-	testFLOAT64Codec(t, math.Ln10)
-	testFLOAT64Codec(t, math.Log10E)
+	testFloat64(t, math.Ln2, []byte{0x3f, 0xe6, 0x2e, 0x42, 0xfe, 0xfa, 0x39, 0xef})
+	testFloat64(t, math.Log2E, []byte{0x3f, 0xf7, 0x15, 0x47, 0x65, 0x2b, 0x82, 0xfe})
+	testFloat64(t, math.Ln10, []byte{0x40, 0x2, 0x6b, 0xb1, 0xbb, 0xb5, 0x55, 0x16})
+	testFloat64(t, math.Log10E, []byte{0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0xe})
 
-	testFLOAT64Codec(t, math.E)
-	testFLOAT64Codec(t, math.Phi)
-	testFLOAT64Codec(t, math.Pi)
+	testFloat64(t, math.E, []byte{0x40, 0x5, 0xbf, 0xa, 0x8b, 0x14, 0x57, 0x69})
+	testFloat64(t, math.Phi, []byte{0x3f, 0xf9, 0xe3, 0x77, 0x9b, 0x97, 0xf4, 0xa8})
+	testFloat64(t, math.Pi, []byte{0x40, 0x9, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18})
 }
 
 ////////////////////////////////////////

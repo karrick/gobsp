@@ -15,14 +15,75 @@ type Binary interface {
 
 ////////////////////////////////////////
 
+type Uint8 uint8
+
+func (v Uint8) MarshalBinaryTo(iow io.Writer) error {
+	if bw, ok := iow.(io.ByteWriter); ok {
+		return bw.WriteByte(byte(v))
+	}
+	buf := []byte{
+		byte(v),
+	}
+	_, err := iow.Write(buf)
+	return err
+}
+
+func (v *Uint8) UnmarshalBinaryFrom(ior io.Reader) error {
+	if br, ok := ior.(io.ByteReader); ok {
+		b, err := br.ReadByte()
+		if err == nil {
+			*v = Uint8(b)
+		}
+		return err
+	}
+	buf := make([]byte, 1)
+	if _, err := io.ReadFull(ior, buf); err != nil {
+		return err
+	}
+	*v = Uint8(buf[0])
+	return nil
+}
+
+func (v Uint8) String() string {
+	return strconv.FormatUint(uint64(v), 10)
+}
+
+////////////////////////////////////////
+
+type Uint16 uint16
+
+func (v Uint16) MarshalBinaryTo(iow io.Writer) error {
+	buf := []byte{
+		byte(v >> 8),
+		byte(v),
+	}
+	_, err := iow.Write(buf)
+	return err
+}
+
+func (v *Uint16) UnmarshalBinaryFrom(ior io.Reader) error {
+	buf := make([]byte, 2)
+	if _, err := io.ReadFull(ior, buf); err != nil {
+		return err
+	}
+	*v = Uint16(uint16(buf[0])<<8 | uint16(buf[1]))
+	return nil
+}
+
+func (v Uint16) String() string {
+	return strconv.FormatUint(uint64(v), 10)
+}
+
+////////////////////////////////////////
+
 type Uint32 uint32
 
-func (v *Uint32) MarshalBinaryTo(iow io.Writer) error {
+func (v Uint32) MarshalBinaryTo(iow io.Writer) error {
 	buf := []byte{
-		byte(*v >> 24),
-		byte(*v >> 16),
-		byte(*v >> 8),
-		byte(*v),
+		byte(v >> 24),
+		byte(v >> 16),
+		byte(v >> 8),
+		byte(v),
 	}
 	_, err := iow.Write(buf)
 	return err
@@ -45,16 +106,16 @@ func (v Uint32) String() string {
 
 type Uint64 uint64
 
-func (v *Uint64) MarshalBinaryTo(iow io.Writer) error {
+func (v Uint64) MarshalBinaryTo(iow io.Writer) error {
 	buf := []byte{
-		byte(*v >> 56),
-		byte(*v >> 48),
-		byte(*v >> 40),
-		byte(*v >> 32),
-		byte(*v >> 24),
-		byte(*v >> 16),
-		byte(*v >> 8),
-		byte(*v),
+		byte(v >> 56),
+		byte(v >> 48),
+		byte(v >> 40),
+		byte(v >> 32),
+		byte(v >> 24),
+		byte(v >> 16),
+		byte(v >> 8),
+		byte(v),
 	}
 	_, err := iow.Write(buf)
 	return err
@@ -77,9 +138,9 @@ func (v Uint64) String() string {
 
 type VWI uint64
 
-func (v *VWI) MarshalBinaryTo(iow io.Writer) error {
+func (v VWI) MarshalBinaryTo(iow io.Writer) error {
 	var err error
-	value := uint(*v)
+	value := uint(v)
 	if value == 0 {
 		_, err = iow.Write([]byte{0})
 	}
@@ -126,8 +187,8 @@ func (v VWI) String() string {
 
 type Float64 float64
 
-func (v *Float64) MarshalBinaryTo(iow io.Writer) error {
-	vv := *(*uint64)(unsafe.Pointer(v))
+func (v Float64) MarshalBinaryTo(iow io.Writer) error {
+	vv := *(*uint64)(unsafe.Pointer(&v))
 	buf := []byte{
 		byte(vv >> 56),
 		byte(vv >> 48),
@@ -165,14 +226,47 @@ func (v Float64) String() string {
 
 ////////////////////////////////////////
 
+type Float32 float32
+
+func (v Float32) MarshalBinaryTo(iow io.Writer) error {
+	vv := *(*uint32)(unsafe.Pointer(&v))
+	buf := []byte{
+		byte(vv >> 24),
+		byte(vv >> 16),
+		byte(vv >> 8),
+		byte(vv),
+	}
+	_, err := iow.Write(buf)
+	return err
+}
+
+func (v *Float32) UnmarshalBinaryFrom(ior io.Reader) error {
+	buf := make([]byte, 4)
+	if _, err := io.ReadFull(ior, buf); err != nil {
+		return err
+	}
+	j := uint32(buf[0])<<24 |
+		uint32(buf[1])<<16 |
+		uint32(buf[2])<<8 |
+		uint32(buf[3])
+	*v = Float32(*(*float32)(unsafe.Pointer(&j)))
+	return nil
+}
+
+func (v Float32) String() string {
+	return strconv.FormatFloat(float64(v), 'g', -1, 32)
+}
+
+////////////////////////////////////////
+
 type String string
 
-func (v *String) MarshalBinaryTo(iow io.Writer) error {
-	size := VWI(len(string(*v)))
+func (v String) MarshalBinaryTo(iow io.Writer) error {
+	size := VWI(len(string(v)))
 	if err := size.MarshalBinaryTo(iow); err != nil {
 		return err
 	}
-	_, err := io.WriteString(iow, string(*v))
+	_, err := io.WriteString(iow, string(v))
 	return err
 }
 
@@ -197,13 +291,13 @@ func (v String) String() string {
 
 type StringSlice []String
 
-func (v *StringSlice) MarshalBinaryTo(iow io.Writer) error {
+func (v StringSlice) MarshalBinaryTo(iow io.Writer) error {
 	var err error
-	size := VWI(len(*v))
+	size := VWI(len(v))
 	if err = size.MarshalBinaryTo(iow); err != nil {
 		return err
 	}
-	for _, s := range *v {
+	for _, s := range v {
 		if err := s.MarshalBinaryTo(iow); err != nil {
 			return err
 		}
