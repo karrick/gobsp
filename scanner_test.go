@@ -1,4 +1,4 @@
-package guanoloco
+package gobsp
 
 import (
 	"bytes"
@@ -115,6 +115,45 @@ func TestBinaryScannerHandleUnknownMessageTypeWithDefaultHandler(t *testing.T) {
 
 	scanner, err := NewScanner(bb,
 		DefaultHandler(DiscardAll),
+		Handlers(handlers))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ensure(t, scanner.Scan(), true)
+	ensure(t, scanner.Handle(), nil)
+
+	ensure(t, scanner.Scan(), true)
+	ensure(t, scanner.Handle(), nil)
+
+	ensure(t, scanner.Scan(), true)
+	ensure(t, scanner.Handle(), nil)
+
+	ensure(t, scanner.Scan(), false)
+	ensure(t, scanner.Err(), nil)
+}
+
+func TestBinaryScannerHandleForgetsToConsumeAll(t *testing.T) {
+	bb := bytes.NewBuffer([]byte{
+		0x00, 0x00, // normal message to ensure it keeps going
+		0x01, 0x04, 0xDE, 0xAD, 0xBE, 0xEF, // message and payload
+		0x00, 0x00, // normal message to ensure it keeps going
+	})
+
+	handlers := map[uint32]MessageHandler{
+		0x00: func(ior io.Reader) error {
+			DiscardAll(ior)
+			return nil
+		},
+		0x01: func(ior io.Reader) error {
+			// read a few of the bytes, but not all of them
+			buf := make([]byte, 2)
+			io.ReadFull(ior, buf)
+			return nil
+		},
+	}
+
+	scanner, err := NewScanner(bb,
 		Handlers(handlers))
 	if err != nil {
 		t.Fatal(err)

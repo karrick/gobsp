@@ -1,4 +1,4 @@
-package guanoloco
+package gobsp
 
 import (
 	"bufio"
@@ -117,15 +117,14 @@ func (s *Scanner) Handle() error {
 		return s.err
 	}
 	limitReader := io.LimitReader(s.bufferedReader, int64(s.messageSize))
+	defer DiscardAll(limitReader)
 	handler, ok := s.handlers[uint32(s.messageType)]
 	if !ok {
 		if s.defaultHandler == nil {
-			DiscardAll(limitReader)
 			s.err = ErrUnknownMessageType(s.messageType)
 			return s.err
 		}
-		s.defaultHandler(limitReader)
-		return nil
+		return s.defaultHandler(limitReader)
 	}
 	return handler(limitReader)
 }

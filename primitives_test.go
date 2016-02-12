@@ -1,4 +1,4 @@
-package guanoloco
+package gobsp
 
 import (
 	"bytes"
