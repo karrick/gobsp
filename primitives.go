@@ -18,17 +18,17 @@ type Binary interface {
 type Uint8 uint8
 
 func (v Uint8) MarshalBinaryTo(iow io.Writer) error {
+	// Use ByteWriter optimization, if available
 	if bw, ok := iow.(io.ByteWriter); ok {
 		return bw.WriteByte(byte(v))
 	}
-	buf := []byte{
-		byte(v),
-	}
-	_, err := iow.Write(buf)
+	// Otherwise, just use tiny slice
+	_, err := iow.Write([]byte{byte(v)})
 	return err
 }
 
 func (v *Uint8) UnmarshalBinaryFrom(ior io.Reader) error {
+	// Use ByteReader optimization, if available
 	if br, ok := ior.(io.ByteReader); ok {
 		b, err := br.ReadByte()
 		if err == nil {
@@ -36,12 +36,13 @@ func (v *Uint8) UnmarshalBinaryFrom(ior io.Reader) error {
 		}
 		return err
 	}
+	// Otherwise, just use tiny slice
 	buf := make([]byte, 1)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Uint8(buf[0])
 	}
-	*v = Uint8(buf[0])
-	return nil
+	return err
 }
 
 func (v Uint8) String() string {
@@ -139,10 +140,30 @@ func (v Uint64) String() string {
 type VWI uint64
 
 func (v VWI) MarshalBinaryTo(iow io.Writer) error {
-	var err error
-	value := uint(v)
+	value := uint64(v)
+
+	// Use ByteWriter optimization if available (~3x optimization)
+	if iobw, ok := iow.(io.ByteWriter); ok {
+		if value == 0 {
+			return iobw.WriteByte(byte(0))
+		}
+		for value > 0 {
+			b := byte(value & 127)
+			value >>= 7
+			if value != 0 {
+				b |= 128
+			}
+			if err := iobw.WriteByte(byte(b)); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Otherwise, just use tiny buffer
 	if value == 0 {
-		_, err = iow.Write([]byte{0})
+		_, err := iow.Write([]byte{0})
+		return err
 	}
 	for value > 0 {
 		b := byte(value & 127)
@@ -150,11 +171,11 @@ func (v VWI) MarshalBinaryTo(iow io.Writer) error {
 		if value != 0 {
 			b |= 128
 		}
-		if _, err = iow.Write([]byte{b}); err != nil {
+		if _, err := iow.Write([]byte{b}); err != nil {
 			break
 		}
 	}
-	return err
+	return nil
 }
 
 func (v *VWI) UnmarshalBinaryFrom(ior io.Reader) error {
@@ -162,8 +183,24 @@ func (v *VWI) UnmarshalBinaryFrom(ior io.Reader) error {
 	const flag = byte(128)
 	var value uint64
 
-	buf := make([]byte, 1)
+	// use ByteReader optimization if available (~3x optimization)
+	if iobr, ok := ior.(io.ByteReader); ok {
+		for shift := uint(0); ; shift += 7 {
+			b, err := iobr.ReadByte()
+			if err != nil {
+				return err
+			}
+			value |= uint64(b&mask) << shift
+			if b&flag == 0 {
+				break
+			}
+		}
+		*v = VWI(value)
+		return nil
+	}
 
+	// Otherwise, just use tiny buffer
+	buf := make([]byte, 1)
 	for shift := uint(0); ; shift += 7 {
 		if _, err := io.ReadFull(ior, buf); err != nil {
 			return err
