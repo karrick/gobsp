@@ -22,11 +22,53 @@ type testBytes interface {
 }
 
 ////////////////////////////////////////
+// Int8
+////////////////////////////////////////
+
+func testInt8(t *testing.T, value int, buf []byte) {
+	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
+		vin := Int8(value)
+		var vout Int8
+
+		if err := vin.MarshalBinaryTo(scratch); err != nil {
+			t.Error(err)
+		}
+
+		if sb, ok := scratch.(testBytes); ok {
+			if actual, expected := sb.Bytes(), buf; !bytes.Equal(actual, expected) {
+				t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+			}
+		}
+
+		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
+			t.Error(err)
+		}
+
+		if actual, expected := vout, vin; actual != expected {
+			t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+		}
+	}
+
+	test(t, value, buf, new(buffer.Buffer))
+	test(t, value, buf, new(bytes.Buffer))
+}
+
+func TestBinaryInt8Codec(t *testing.T) {
+	testInt8(t, 0, []byte{0x00})
+	testInt8(t, 1, []byte{0x01})
+	testInt8(t, -1, []byte{0xFF})
+	testInt8(t, 2, []byte{0x02})
+	testInt8(t, -2, []byte{0xFE})
+	testInt8(t, 127, []byte{0x7f})
+	testInt8(t, -127, []byte{0x81})
+}
+
+////////////////////////////////////////
 // Uint8
 ////////////////////////////////////////
 
-func testUint8(t *testing.T, value uint64, buf []uint8) {
-	test := func(t *testing.T, value uint64, buf []uint8, scratch testBuffer) {
+func testUint8(t *testing.T, value int, buf []byte) {
+	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := Uint8(value)
 		var vout Uint8
 
@@ -54,21 +96,55 @@ func testUint8(t *testing.T, value uint64, buf []uint8) {
 }
 
 func TestBinaryUint8Codec(t *testing.T) {
-	testUint8(t, 0, []uint8{0x00})
-	testUint8(t, 1, []uint8{0x01})
-	testUint8(t, 2, []uint8{0x02})
-	testUint8(t, 127, []uint8{0x7f})
-	testUint8(t, 128, []uint8{0x80})
-	testUint8(t, 129, []uint8{0x81})
-	testUint8(t, 254, []uint8{0xfe})
-	testUint8(t, 255, []uint8{0xff})
+	testUint8(t, 0, []byte{0x00})
+	testUint8(t, 1, []byte{0x01})
+	testUint8(t, 2, []byte{0x02})
+	testUint8(t, 127, []byte{0x7f})
+	testUint8(t, 128, []byte{0x80})
+	testUint8(t, 129, []byte{0x81})
+	testUint8(t, 254, []byte{0xfe})
+	testUint8(t, 255, []byte{0xff})
+}
+
+////////////////////////////////////////
+// Int16
+////////////////////////////////////////
+
+func testInt16(t *testing.T, value int, buf []byte) {
+	vin := Int16(value)
+	var vout Int16
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Int16(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryINT16Codec(t *testing.T) {
+	testInt16(t, 0, []byte{0x00, 0x00})
+	testInt16(t, 1, []byte{0x00, 0x01})
+	testInt16(t, -1, []byte{0xFF, 0xFF})
+	testInt16(t, 2, []byte{0x00, 0x02})
+	testInt16(t, -2, []byte{0xFF, 0xFE})
 }
 
 ////////////////////////////////////////
 // Uint16
 ////////////////////////////////////////
 
-func testUint16(t *testing.T, value uint64, buf []byte) {
+func testUint16(t *testing.T, value int, buf []byte) {
 	vin := Uint16(value)
 	var vout Uint16
 	bb := new(bytes.Buffer)
@@ -103,10 +179,44 @@ func TestBinaryUINT16Codec(t *testing.T) {
 }
 
 ////////////////////////////////////////
+// Int32
+////////////////////////////////////////
+
+func testInt32(t *testing.T, value int, buf []byte) {
+	vin := Int32(value)
+	var vout Int32
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Int32(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryINT32Codec(t *testing.T) {
+	testInt32(t, 0, []byte{0x00, 0x00, 0x00, 0x00})
+	testInt32(t, 1, []byte{0x00, 0x00, 0x00, 0x01})
+	testInt32(t, -1, []byte{0xFF, 0xFF, 0xFF, 0xFF})
+	testInt32(t, 2, []byte{0x00, 0x00, 0x00, 0x02})
+	testInt32(t, -2, []byte{0xFF, 0xFF, 0xFF, 0xFE})
+}
+
+////////////////////////////////////////
 // Uint32
 ////////////////////////////////////////
 
-func testUint32(t *testing.T, value uint64, buf []byte) {
+func testUint32(t *testing.T, value int, buf []byte) {
 	vin := Uint32(value)
 	var vout Uint32
 	bb := new(bytes.Buffer)
@@ -141,10 +251,44 @@ func TestBinaryUINT32Codec(t *testing.T) {
 }
 
 ////////////////////////////////////////
+// Int64
+////////////////////////////////////////
+
+func testInt64(t *testing.T, value int, buf []byte) {
+	vin := Int64(value)
+	var vout Int64
+	bb := new(bytes.Buffer)
+
+	if err := vin.MarshalBinaryTo(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := bb.Bytes(), buf; !bytes.Equal(actual, expected) {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+
+	if err := vout.UnmarshalBinaryFrom(bb); err != nil {
+		t.Error(err)
+	}
+
+	if actual, expected := vout, Int64(value); actual != expected {
+		t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+	}
+}
+
+func TestBinaryINT64Codec(t *testing.T) {
+	testInt64(t, 0, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+	testInt64(t, 1, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
+	testInt64(t, -1, []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF})
+	testInt64(t, 2, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02})
+	testInt64(t, -2, []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE})
+}
+
+////////////////////////////////////////
 // Uint64
 ////////////////////////////////////////
 
-func testUint64(t *testing.T, value uint64, buf []byte) {
+func testUint64(t *testing.T, value int, buf []byte) {
 	vin := Uint64(value)
 	var vout Uint64
 	bb := new(bytes.Buffer)
@@ -269,11 +413,11 @@ func TestBinaryFLOAT64Codec(t *testing.T) {
 }
 
 ////////////////////////////////////////
-// VWI -- variable width integer
+// VWI -- signed variable width integer
 ////////////////////////////////////////
 
-func testVWICodec(t *testing.T, value uint64, buf []byte) {
-	test := func(t *testing.T, value uint64, buf []uint8, scratch testBuffer) {
+func testVWICodec(t *testing.T, value int, buf []byte) {
+	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := VWI(value)
 		var vout VWI
 
@@ -302,41 +446,143 @@ func testVWICodec(t *testing.T, value uint64, buf []byte) {
 
 func TestBinaryVWICodecOneByte(t *testing.T) {
 	testVWICodec(t, 0, []byte{0x00})
-	testVWICodec(t, 1, []byte{0x01})
-	testVWICodec(t, 2, []byte{0x02})
-	testVWICodec(t, 127, []byte{0x7f})
+	testVWICodec(t, -1, []byte{0x01})
+	testVWICodec(t, 1, []byte{0x02})
+	testVWICodec(t, -2, []byte{0x03})
+	testVWICodec(t, 2, []byte{0x04})
+	testVWICodec(t, -3, []byte{0x05})
+	testVWICodec(t, 3, []byte{0x06})
 }
 
 func TestBinaryVWICodecMultipleBytes(t *testing.T) {
-	testVWICodec(t, 0x7F, []byte{0x7F})
-	testVWICodec(t, 0x80, []byte{0x80, 0x01})
-	testVWICodec(t, 0x81, []byte{0x81, 0x01})
+	testVWICodec(t, 64, []byte{0x80, 0x01})
+	testVWICodec(t, -65, []byte{0x81, 0x01})
 
-	testVWICodec(t, 0x00003FFF, []byte{0xFF, 0x7F})
-	testVWICodec(t, 0x00004000, []byte{0x80, 0x80, 0x01})
-	testVWICodec(t, 0x00004001, []byte{0x81, 0x80, 0x01})
-
-	testVWICodec(t, 0x001FFFFF, []byte{0xFF, 0xFF, 0x7F})
-	testVWICodec(t, 0x00200000, []byte{0x80, 0x80, 0x80, 0x01})
-	testVWICodec(t, 0x00200001, []byte{0x81, 0x80, 0x80, 0x01})
-
-	testVWICodec(t, 0x0FFFFFFF, []byte{0xFF, 0xFF, 0xFF, 0x7F})
-	testVWICodec(t, 0x10000000, []byte{0x80, 0x80, 0x80, 0x80, 0x01})
-	testVWICodec(t, 0x10000001, []byte{0x81, 0x80, 0x80, 0x80, 0x01})
+	testVWICodec(t, 2147483647, []byte("\xfe\xff\xff\xff\x0f"))
+	testVWICodec(t, -2147483648, []byte("\xff\xff\xff\xff\x0f"))
+	testVWICodec(t, 1082196484, []byte("\x88\x88\x88\x88\x08"))
+	testVWICodec(t, 138521149956, []byte("\x88\x88\x88\x88\x88\x08"))
+	testVWICodec(t, 17730707194372, []byte("\x88\x88\x88\x88\x88\x88\x08"))
+	testVWICodec(t, 2269530520879620, []byte("\x88\x88\x88\x88\x88\x88\x88\x08"))
 }
 
-func BenchmarkVWIBuffer(b *testing.B) {
-	benchmarkVWI(b, new(buffer.Buffer))
+////////////////////////////////////////
+// UVWI -- unsigned variable width integer
+////////////////////////////////////////
+
+func testUVWICodec(t *testing.T, value int, buf []byte) {
+	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
+		vin := UVWI(value)
+		var vout UVWI
+
+		if err := vin.MarshalBinaryTo(scratch); err != nil {
+			t.Error(err)
+		}
+
+		if sb, ok := scratch.(testBytes); ok {
+			if actual, expected := sb.Bytes(), buf; !bytes.Equal(actual, expected) {
+				t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+			}
+		}
+
+		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
+			t.Error(err)
+		}
+
+		if actual, expected := vout, vin; actual != expected {
+			t.Errorf("Actual: %#v; Expected: %#v", actual, expected)
+		}
+	}
+
+	test(t, value, buf, new(buffer.Buffer))
+	test(t, value, buf, new(bytes.Buffer))
 }
 
-func BenchmarkVWIBytes(b *testing.B) {
-	benchmarkVWI(b, new(bytes.Buffer))
+func TestBinaryUVWICodecOneByte(t *testing.T) {
+	testUVWICodec(t, 0, []byte{0x00})
+	testUVWICodec(t, 1, []byte{0x01})
+	testUVWICodec(t, 2, []byte{0x02})
+	testUVWICodec(t, 127, []byte{0x7f})
 }
 
-func benchmarkVWI(b *testing.B, scratch testBuffer) {
-	const largeVWIValue = 0x0FFFFFFF
-	vin := VWI(largeVWIValue)
-	var vout VWI
+func TestBinaryUVWICodecMultipleBytes(t *testing.T) {
+	testUVWICodec(t, 0x7F, []byte{0x7F})
+	testUVWICodec(t, 0x80, []byte{0x80, 0x01})
+	testUVWICodec(t, 0x81, []byte{0x81, 0x01})
+
+	testUVWICodec(t, 0x00003FFF, []byte{0xFF, 0x7F})
+	testUVWICodec(t, 0x00004000, []byte{0x80, 0x80, 0x01})
+	testUVWICodec(t, 0x00004001, []byte{0x81, 0x80, 0x01})
+
+	testUVWICodec(t, 0x001FFFFF, []byte{0xFF, 0xFF, 0x7F})
+	testUVWICodec(t, 0x00200000, []byte{0x80, 0x80, 0x80, 0x01})
+	testUVWICodec(t, 0x00200001, []byte{0x81, 0x80, 0x80, 0x01})
+
+	testUVWICodec(t, 0x0FFFFFFF, []byte{0xFF, 0xFF, 0xFF, 0x7F})
+	testUVWICodec(t, 0x10000000, []byte{0x80, 0x80, 0x80, 0x80, 0x01})
+	testUVWICodec(t, 0x10000001, []byte{0x81, 0x80, 0x80, 0x80, 0x01})
+}
+
+func TestBinaryUVWICodecSigned(t *testing.T) {
+	// testInt8(t, 0, []byte{0x00})
+	// testInt8(t, -1, []byte{0x01})
+	// testInt8(t, 1, []byte{0x02})
+	// testInt8(t, -2, []byte{0x03})
+	// testInt8(t, 2, []byte{0x04})
+	// testInt8(t, -3, []byte{0x05})
+	// testInt8(t, 3, []byte{0x06})
+}
+
+func BenchmarkUVWIBuffer(b *testing.B) {
+	benchmarkUVWI(b, new(buffer.Buffer))
+}
+
+func BenchmarkUVWIBytes(b *testing.B) {
+	benchmarkUVWI(b, new(bytes.Buffer))
+}
+
+func benchmarkUVWI(b *testing.B, scratch testBuffer) {
+	const largeUVWIValue = 0x0FFFFFFF
+	vin := UVWI(largeUVWIValue)
+	var vout UVWI
+
+	for i := 0; i < b.N; i++ {
+		if err := vin.MarshalBinaryTo(scratch); err != nil {
+			b.Fatal(err)
+		}
+		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
+			b.Fatal(err)
+		}
+		if actual, expected := vout, vin; actual != expected {
+			b.Fatalf("Actual: %#v; Expected: %#v", actual, expected)
+		}
+	}
+}
+
+////////////////////////////////////////
+
+func BenchmarkTwoBytesUINT16(b *testing.B) {
+	vin := Uint16(0x00003FFF) // largest integer that can be stored in 2 bytes UVWI
+	var vout Uint16
+	scratch := new(buffer.Buffer) // ensure not using ByteReader ByteWriter optimization
+
+	for i := 0; i < b.N; i++ {
+		if err := vin.MarshalBinaryTo(scratch); err != nil {
+			b.Fatal(err)
+		}
+		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
+			b.Fatal(err)
+		}
+		if actual, expected := vout, vin; actual != expected {
+			b.Fatalf("Actual: %#v; Expected: %#v", actual, expected)
+		}
+	}
+}
+
+func BenchmarkTwoBytesUVWI(b *testing.B) {
+	vin := UVWI(0x00003FFF) // largest integer that can be stored in 2 bytes UVWI
+	var vout UVWI
+	scratch := new(buffer.Buffer) // ensure not using ByteReader ByteWriter optimization
 
 	for i := 0; i < b.N; i++ {
 		if err := vin.MarshalBinaryTo(scratch); err != nil {
