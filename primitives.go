@@ -6,14 +6,10 @@ import (
 	"unsafe"
 )
 
-////////////////////////////////////////
-
 type Binary interface {
 	MarshalBinaryTo(io.Writer) error
 	UnmarshalBinaryFrom(io.Reader) error
 }
-
-////////////////////////////////////////
 
 type Int8 int8
 
@@ -49,8 +45,6 @@ func (v Int8) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
 type Uint8 uint8
 
 func (v Uint8) MarshalBinaryTo(iow io.Writer) error {
@@ -85,8 +79,6 @@ func (v Uint8) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
 type Int16 int16
 
 func (v Int16) MarshalBinaryTo(iow io.Writer) error {
@@ -111,8 +103,6 @@ func (v Int16) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
 type Uint16 uint16
 
 func (v Uint16) MarshalBinaryTo(iow io.Writer) error {
@@ -136,8 +126,6 @@ func (v *Uint16) UnmarshalBinaryFrom(ior io.Reader) error {
 func (v Uint16) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
-
-////////////////////////////////////////
 
 type Int32 int32
 
@@ -165,8 +153,6 @@ func (v Int32) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
 type Uint32 uint32
 
 func (v Uint32) MarshalBinaryTo(iow io.Writer) error {
@@ -193,8 +179,6 @@ func (v Uint32) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
 type Int64 int64
 
 func (v Int64) MarshalBinaryTo(iow io.Writer) error {
@@ -217,15 +201,14 @@ func (v *Int64) UnmarshalBinaryFrom(ior io.Reader) error {
 	if _, err := io.ReadFull(ior, buf); err != nil {
 		return err
 	}
-	*v = Int64(int64(buf[0])<<56 | int64(buf[1])<<48 | int64(buf[2])<<40 | int64(buf[3])<<32 | int64(buf[4])<<24 | int64(buf[5])<<16 | int64(buf[6])<<8 | int64(buf[7]))
+	*v = Int64(int64(buf[0])<<56 | int64(buf[1])<<48 | int64(buf[2])<<40 | int64(buf[3])<<32 |
+		int64(buf[4])<<24 | int64(buf[5])<<16 | int64(buf[6])<<8 | int64(buf[7]))
 	return nil
 }
 
 func (v Int64) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
-
-////////////////////////////////////////
 
 type Uint64 uint64
 
@@ -249,7 +232,8 @@ func (v *Uint64) UnmarshalBinaryFrom(ior io.Reader) error {
 	if _, err := io.ReadFull(ior, buf); err != nil {
 		return err
 	}
-	*v = Uint64(uint64(buf[0])<<56 | uint64(buf[1])<<48 | uint64(buf[2])<<40 | uint64(buf[3])<<32 | uint64(buf[4])<<24 | uint64(buf[5])<<16 | uint64(buf[6])<<8 | uint64(buf[7]))
+	*v = Uint64(uint64(buf[0])<<56 | uint64(buf[1])<<48 | uint64(buf[2])<<40 | uint64(buf[3])<<32 |
+		uint64(buf[4])<<24 | uint64(buf[5])<<16 | uint64(buf[6])<<8 | uint64(buf[7]))
 	return nil
 }
 
@@ -257,14 +241,7 @@ func (v Uint64) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-////////////////////////////////////////
-
-type VWI int64
-
-func (v VWI) MarshalBinaryTo(iow io.Writer) error {
-	// move sign bit to least position of least significant bit
-	value := uint64((v << 1) ^ (v >> 63))
-
+func encodeVWI(iow io.Writer, value uint64) error {
 	// Use ByteWriter optimization if available (~3x optimization)
 	if iobw, ok := iow.(io.ByteWriter); ok {
 		if value == 0 {
@@ -295,97 +272,13 @@ func (v VWI) MarshalBinaryTo(iow io.Writer) error {
 			b |= 128
 		}
 		if _, err := iow.Write([]byte{b}); err != nil {
-			break
-		}
-	}
-	return nil
-}
-
-func (v *VWI) UnmarshalBinaryFrom(ior io.Reader) error {
-	const mask = byte(127)
-	const flag = byte(128)
-	var value int64
-
-	// use ByteReader optimization if available (~3x optimization)
-	if iobr, ok := ior.(io.ByteReader); ok {
-		for shift := uint(0); ; shift += 7 {
-			b, err := iobr.ReadByte()
-			if err != nil {
-				return err
-			}
-			value |= int64(b&mask) << shift
-			if b&flag == 0 {
-				break
-			}
-		}
-		*v = VWI((int64(value>>1) ^ -int64(value&1)))
-		return nil
-	}
-
-	// Otherwise, just use tiny buffer
-	buf := make([]byte, 1)
-	for shift := uint(0); ; shift += 7 {
-		if _, err := io.ReadFull(ior, buf); err != nil {
 			return err
 		}
-		b := buf[0]
-		value |= int64(b&mask) << shift
-		if b&flag == 0 {
-			break
-		}
-	}
-	*v = VWI((int64(value>>1) ^ -int64(value&1)))
-	return nil
-}
-
-func (v VWI) String() string {
-	return strconv.FormatUint(uint64(v), 10)
-}
-
-////////////////////////////////////////
-
-type UVWI uint64
-
-func (v UVWI) MarshalBinaryTo(iow io.Writer) error {
-	value := uint64(v)
-
-	// Use ByteWriter optimization if available (~3x optimization)
-	if iobw, ok := iow.(io.ByteWriter); ok {
-		if value == 0 {
-			return iobw.WriteByte(byte(0))
-		}
-		for value > 0 {
-			b := byte(value & 127)
-			value >>= 7
-			if value != 0 {
-				b |= 128
-			}
-			if err := iobw.WriteByte(byte(b)); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	// Otherwise, just use tiny buffer
-	if value == 0 {
-		_, err := iow.Write([]byte{0})
-		return err
-	}
-	for value > 0 {
-		b := byte(value & 127)
-		value >>= 7
-		if value != 0 {
-			b |= 128
-		}
-		if _, err := iow.Write([]byte{b}); err != nil {
-			break
-		}
 	}
 	return nil
 }
 
-func (v *UVWI) UnmarshalBinaryFrom(ior io.Reader) error {
+func decodeVWI(ior io.Reader) (uint64, error) {
 	const mask = byte(127)
 	const flag = byte(128)
 	var value uint64
@@ -395,22 +288,21 @@ func (v *UVWI) UnmarshalBinaryFrom(ior io.Reader) error {
 		for shift := uint(0); ; shift += 7 {
 			b, err := iobr.ReadByte()
 			if err != nil {
-				return err
+				return 0, err
 			}
 			value |= uint64(b&mask) << shift
 			if b&flag == 0 {
 				break
 			}
 		}
-		*v = UVWI(value)
-		return nil
+		return value, nil
 	}
 
 	// Otherwise, just use tiny buffer
 	buf := make([]byte, 1)
 	for shift := uint(0); ; shift += 7 {
 		if _, err := io.ReadFull(ior, buf); err != nil {
-			return err
+			return 0, err
 		}
 		b := buf[0]
 		value |= uint64(b&mask) << shift
@@ -418,16 +310,47 @@ func (v *UVWI) UnmarshalBinaryFrom(ior io.Reader) error {
 			break
 		}
 	}
+	return value, nil
+}
 
-	*v = UVWI(value)
-	return nil
+type VWI int64
+
+func (v VWI) MarshalBinaryTo(iow io.Writer) error {
+	// move sign bit from most to least significant bit
+	value := uint64((v << 1) ^ (v >> 63))
+	return encodeVWI(iow, value)
+}
+
+func (v *VWI) UnmarshalBinaryFrom(ior io.Reader) error {
+	value, err := decodeVWI(ior)
+	if err == nil {
+		// move the sign bit from least to most significant bit
+		*v = VWI((int64(value>>1) ^ -int64(value&1)))
+	}
+	return err
+}
+
+func (v VWI) String() string {
+	return strconv.FormatUint(uint64(v), 10)
+}
+
+type UVWI uint64
+
+func (v UVWI) MarshalBinaryTo(iow io.Writer) error {
+	return encodeVWI(iow, uint64(v))
+}
+
+func (v *UVWI) UnmarshalBinaryFrom(ior io.Reader) error {
+	value, err := decodeVWI(ior)
+	if err == nil {
+		*v = UVWI(value)
+	}
+	return err
 }
 
 func (v UVWI) String() string {
 	return strconv.FormatUint(uint64(v), 10)
 }
-
-////////////////////////////////////////
 
 type Float32 float32
 
@@ -459,8 +382,6 @@ func (v *Float32) UnmarshalBinaryFrom(ior io.Reader) error {
 func (v Float32) String() string {
 	return strconv.FormatFloat(float64(v), 'g', -1, 32)
 }
-
-////////////////////////////////////////
 
 type Float64 float64
 
@@ -501,8 +422,6 @@ func (v Float64) String() string {
 	return strconv.FormatFloat(float64(v), 'g', -1, 64)
 }
 
-////////////////////////////////////////
-
 type String string
 
 func (v String) MarshalBinaryTo(iow io.Writer) error {
@@ -530,8 +449,6 @@ func (v *String) UnmarshalBinaryFrom(ior io.Reader) error {
 func (v String) String() string {
 	return string(v)
 }
-
-////////////////////////////////////////
 
 type StringSlice []String
 
