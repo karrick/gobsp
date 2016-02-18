@@ -92,11 +92,11 @@ func (v Int16) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Int16) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 2)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Int16(int16(buf[0])<<8 | int16(buf[1]))
 	}
-	*v = Int16(int16(buf[0])<<8 | int16(buf[1]))
-	return nil
+	return err
 }
 
 func (v Int16) String() string {
@@ -116,11 +116,11 @@ func (v Uint16) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Uint16) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 2)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Uint16(uint16(buf[0])<<8 | uint16(buf[1]))
 	}
-	*v = Uint16(uint16(buf[0])<<8 | uint16(buf[1]))
-	return nil
+	return err
 }
 
 func (v Uint16) String() string {
@@ -142,11 +142,11 @@ func (v Int32) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Int32) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 4)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Int32(int32(buf[0])<<24 | int32(buf[1])<<16 | int32(buf[2])<<8 | int32(buf[3]))
 	}
-	*v = Int32(int32(buf[0])<<24 | int32(buf[1])<<16 | int32(buf[2])<<8 | int32(buf[3]))
-	return nil
+	return err
 }
 
 func (v Int32) String() string {
@@ -168,11 +168,11 @@ func (v Uint32) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Uint32) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 4)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Uint32(uint32(buf[0])<<24 | uint32(buf[1])<<16 | uint32(buf[2])<<8 | uint32(buf[3]))
 	}
-	*v = Uint32(uint32(buf[0])<<24 | uint32(buf[1])<<16 | uint32(buf[2])<<8 | uint32(buf[3]))
-	return nil
+	return err
 }
 
 func (v Uint32) String() string {
@@ -198,12 +198,12 @@ func (v Int64) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Int64) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 8)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Int64(int64(buf[0])<<56 | int64(buf[1])<<48 | int64(buf[2])<<40 | int64(buf[3])<<32 |
+			int64(buf[4])<<24 | int64(buf[5])<<16 | int64(buf[6])<<8 | int64(buf[7]))
 	}
-	*v = Int64(int64(buf[0])<<56 | int64(buf[1])<<48 | int64(buf[2])<<40 | int64(buf[3])<<32 |
-		int64(buf[4])<<24 | int64(buf[5])<<16 | int64(buf[6])<<8 | int64(buf[7]))
-	return nil
+	return err
 }
 
 func (v Int64) String() string {
@@ -229,12 +229,12 @@ func (v Uint64) MarshalBinaryTo(iow io.Writer) error {
 
 func (v *Uint64) UnmarshalBinaryFrom(ior io.Reader) error {
 	buf := make([]byte, 8)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = Uint64(uint64(buf[0])<<56 | uint64(buf[1])<<48 | uint64(buf[2])<<40 | uint64(buf[3])<<32 |
+			uint64(buf[4])<<24 | uint64(buf[5])<<16 | uint64(buf[6])<<8 | uint64(buf[7]))
 	}
-	*v = Uint64(uint64(buf[0])<<56 | uint64(buf[1])<<48 | uint64(buf[2])<<40 | uint64(buf[3])<<32 |
-		uint64(buf[4])<<24 | uint64(buf[5])<<16 | uint64(buf[6])<<8 | uint64(buf[7]))
-	return nil
+	return err
 }
 
 func (v Uint64) String() string {
@@ -439,11 +439,11 @@ func (v *String) UnmarshalBinaryFrom(ior io.Reader) error {
 		return err
 	}
 	buf := make([]byte, size)
-	if _, err := io.ReadFull(ior, buf); err != nil {
-		return err
+	_, err := io.ReadFull(ior, buf)
+	if err == nil {
+		*v = String(buf)
 	}
-	*v = String(buf)
-	return nil
+	return err
 }
 
 func (v String) String() string {
@@ -453,9 +453,8 @@ func (v String) String() string {
 type StringSlice []String
 
 func (v StringSlice) MarshalBinaryTo(iow io.Writer) error {
-	var err error
 	size := UVWI(len(v))
-	if err = size.MarshalBinaryTo(iow); err != nil {
+	if err := size.MarshalBinaryTo(iow); err != nil {
 		return err
 	}
 	for _, s := range v {
