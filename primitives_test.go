@@ -25,7 +25,8 @@ type testBytes interface {
 // Int8
 ////////////////////////////////////////
 
-func testInt8(t *testing.T, value int, buf []byte) {
+func testBinaryInt8(t *testing.T, value int, buf []byte) {
+	// ensure works for both io.Reader & io.Writer, and io.ByteReader & io.ByteWriter
 	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := Int8(value)
 		var vout Int8
@@ -53,21 +54,22 @@ func testInt8(t *testing.T, value int, buf []byte) {
 	test(t, value, buf, new(bytes.Buffer))
 }
 
-func TestBinaryInt8Codec(t *testing.T) {
-	testInt8(t, 0, []byte{0x00})
-	testInt8(t, 1, []byte{0x01})
-	testInt8(t, -1, []byte{0xFF})
-	testInt8(t, 2, []byte{0x02})
-	testInt8(t, -2, []byte{0xFE})
-	testInt8(t, 127, []byte{0x7f})
-	testInt8(t, -127, []byte{0x81})
+func TestBinaryInt8(t *testing.T) {
+	testBinaryInt8(t, 0, []byte{0x00})
+	testBinaryInt8(t, 1, []byte{0x01})
+	testBinaryInt8(t, -1, []byte{0xFF})
+	testBinaryInt8(t, 2, []byte{0x02})
+	testBinaryInt8(t, -2, []byte{0xFE})
+	testBinaryInt8(t, 127, []byte{0x7f})
+	testBinaryInt8(t, -127, []byte{0x81})
 }
 
 ////////////////////////////////////////
 // Uint8
 ////////////////////////////////////////
 
-func testUint8(t *testing.T, value int, buf []byte) {
+func testBinaryUint8(t *testing.T, value int, buf []byte) {
+	// ensure works for both io.Reader & io.Writer, and io.ByteReader & io.ByteWriter
 	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := Uint8(value)
 		var vout Uint8
@@ -95,22 +97,22 @@ func testUint8(t *testing.T, value int, buf []byte) {
 	test(t, value, buf, new(bytes.Buffer))
 }
 
-func TestBinaryUint8Codec(t *testing.T) {
-	testUint8(t, 0, []byte{0x00})
-	testUint8(t, 1, []byte{0x01})
-	testUint8(t, 2, []byte{0x02})
-	testUint8(t, 127, []byte{0x7f})
-	testUint8(t, 128, []byte{0x80})
-	testUint8(t, 129, []byte{0x81})
-	testUint8(t, 254, []byte{0xfe})
-	testUint8(t, 255, []byte{0xff})
+func TestBinaryUint8(t *testing.T) {
+	testBinaryUint8(t, 0, []byte{0x00})
+	testBinaryUint8(t, 1, []byte{0x01})
+	testBinaryUint8(t, 2, []byte{0x02})
+	testBinaryUint8(t, 127, []byte{0x7f})
+	testBinaryUint8(t, 128, []byte{0x80})
+	testBinaryUint8(t, 129, []byte{0x81})
+	testBinaryUint8(t, 254, []byte{0xfe})
+	testBinaryUint8(t, 255, []byte{0xff})
 }
 
 ////////////////////////////////////////
 // Int16
 ////////////////////////////////////////
 
-func testInt16(t *testing.T, value int, buf []byte) {
+func testBinaryInt16(t *testing.T, value int, buf []byte) {
 	vin := Int16(value)
 	var vout Int16
 	bb := new(bytes.Buffer)
@@ -132,19 +134,19 @@ func testInt16(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryINT16Codec(t *testing.T) {
-	testInt16(t, 0, []byte{0x00, 0x00})
-	testInt16(t, 1, []byte{0x00, 0x01})
-	testInt16(t, -1, []byte{0xFF, 0xFF})
-	testInt16(t, 2, []byte{0x00, 0x02})
-	testInt16(t, -2, []byte{0xFF, 0xFE})
+func TestBinaryInt16(t *testing.T) {
+	testBinaryInt16(t, 0, []byte("\x00\x00"))
+	testBinaryInt16(t, 1, []byte("\x00\x01"))
+	testBinaryInt16(t, -1, []byte("\xFF\xFF"))
+	testBinaryInt16(t, 2, []byte("\x00\x02"))
+	testBinaryInt16(t, -2, []byte("\xFF\xFE"))
 }
 
 ////////////////////////////////////////
 // Uint16
 ////////////////////////////////////////
 
-func testUint16(t *testing.T, value int, buf []byte) {
+func testBinaryUint16(t *testing.T, value int, buf []byte) {
 	vin := Uint16(value)
 	var vout Uint16
 	bb := new(bytes.Buffer)
@@ -166,23 +168,23 @@ func testUint16(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryUINT16Codec(t *testing.T) {
-	testUint16(t, 0, []byte{0x00, 0x00})
-	testUint16(t, 1, []byte{0x00, 0x01})
-	testUint16(t, 2, []byte{0x00, 0x02})
-	testUint16(t, 127, []byte{0x00, 0x7f})
-	testUint16(t, 128, []byte{0x00, 0x80})
-	testUint16(t, 129, []byte{0x00, 0x81})
-	testUint16(t, 16383, []byte{0x3f, 0xff})
-	testUint16(t, 16384, []byte{0x40, 0x00})
-	testUint16(t, 16385, []byte{0x40, 0x01})
+func TestBinaryUint16(t *testing.T) {
+	testBinaryUint16(t, 0, []byte("\x00\x00"))
+	testBinaryUint16(t, 1, []byte("\x00\x01"))
+	testBinaryUint16(t, 2, []byte("\x00\x02"))
+	testBinaryUint16(t, 127, []byte("\x00\x7f"))
+	testBinaryUint16(t, 128, []byte("\x00\x80"))
+	testBinaryUint16(t, 129, []byte("\x00\x81"))
+	testBinaryUint16(t, 16383, []byte("\x3f\xff"))
+	testBinaryUint16(t, 16384, []byte("\x40\x00"))
+	testBinaryUint16(t, 16385, []byte("\x40\x01"))
 }
 
 ////////////////////////////////////////
 // Int32
 ////////////////////////////////////////
 
-func testInt32(t *testing.T, value int, buf []byte) {
+func testBinaryInt32(t *testing.T, value int, buf []byte) {
 	vin := Int32(value)
 	var vout Int32
 	bb := new(bytes.Buffer)
@@ -204,19 +206,19 @@ func testInt32(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryINT32Codec(t *testing.T) {
-	testInt32(t, 0, []byte{0x00, 0x00, 0x00, 0x00})
-	testInt32(t, 1, []byte{0x00, 0x00, 0x00, 0x01})
-	testInt32(t, -1, []byte{0xFF, 0xFF, 0xFF, 0xFF})
-	testInt32(t, 2, []byte{0x00, 0x00, 0x00, 0x02})
-	testInt32(t, -2, []byte{0xFF, 0xFF, 0xFF, 0xFE})
+func TestBinaryInt32(t *testing.T) {
+	testBinaryInt32(t, 0, []byte("\x00\x00\x00\x00"))
+	testBinaryInt32(t, 1, []byte("\x00\x00\x00\x01"))
+	testBinaryInt32(t, -1, []byte("\xFF\xFF\xFF\xFF"))
+	testBinaryInt32(t, 2, []byte("\x00\x00\x00\x02"))
+	testBinaryInt32(t, -2, []byte("\xFF\xFF\xFF\xFE"))
 }
 
 ////////////////////////////////////////
 // Uint32
 ////////////////////////////////////////
 
-func testUint32(t *testing.T, value int, buf []byte) {
+func testBinaryUint32(t *testing.T, value int, buf []byte) {
 	vin := Uint32(value)
 	var vout Uint32
 	bb := new(bytes.Buffer)
@@ -238,23 +240,23 @@ func testUint32(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryUINT32Codec(t *testing.T) {
-	testUint32(t, 0, []byte{0x00, 0x00, 0x00, 0x00})
-	testUint32(t, 1, []byte{0x00, 0x00, 0x00, 0x01})
-	testUint32(t, 2, []byte{0x00, 0x00, 0x00, 0x02})
-	testUint32(t, 127, []byte{0x00, 0x00, 0x00, 0x7f})
-	testUint32(t, 128, []byte{0x00, 0x00, 0x00, 0x80})
-	testUint32(t, 129, []byte{0x00, 0x00, 0x00, 0x81})
-	testUint32(t, 16383, []byte{0x00, 0x00, 0x3f, 0xff})
-	testUint32(t, 16384, []byte{0x00, 0x00, 0x40, 0x00})
-	testUint32(t, 16385, []byte{0x00, 0x00, 0x40, 0x01})
+func TestBinaryUint32(t *testing.T) {
+	testBinaryUint32(t, 0, []byte("\x00\x00\x00\x00"))
+	testBinaryUint32(t, 1, []byte("\x00\x00\x00\x01"))
+	testBinaryUint32(t, 2, []byte("\x00\x00\x00\x02"))
+	testBinaryUint32(t, 127, []byte("\x00\x00\x00\x7f"))
+	testBinaryUint32(t, 128, []byte("\x00\x00\x00\x80"))
+	testBinaryUint32(t, 129, []byte("\x00\x00\x00\x81"))
+	testBinaryUint32(t, 16383, []byte("\x00\x00\x3f\xff"))
+	testBinaryUint32(t, 16384, []byte("\x00\x00\x40\x00"))
+	testBinaryUint32(t, 16385, []byte("\x00\x00\x40\x01"))
 }
 
 ////////////////////////////////////////
 // Int64
 ////////////////////////////////////////
 
-func testInt64(t *testing.T, value int, buf []byte) {
+func testBinaryInt64(t *testing.T, value int, buf []byte) {
 	vin := Int64(value)
 	var vout Int64
 	bb := new(bytes.Buffer)
@@ -276,19 +278,19 @@ func testInt64(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryINT64Codec(t *testing.T) {
-	testInt64(t, 0, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-	testInt64(t, 1, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
-	testInt64(t, -1, []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF})
-	testInt64(t, 2, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02})
-	testInt64(t, -2, []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE})
+func TestBinaryInt64(t *testing.T) {
+	testBinaryInt64(t, 0, []byte("\x00\x00\x00\x00\x00\x00\x00\x00"))
+	testBinaryInt64(t, 1, []byte("\x00\x00\x00\x00\x00\x00\x00\x01"))
+	testBinaryInt64(t, -1, []byte("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"))
+	testBinaryInt64(t, 2, []byte("\x00\x00\x00\x00\x00\x00\x00\x02"))
+	testBinaryInt64(t, -2, []byte("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE"))
 }
 
 ////////////////////////////////////////
 // Uint64
 ////////////////////////////////////////
 
-func testUint64(t *testing.T, value int, buf []byte) {
+func testBinaryUint64(t *testing.T, value int, buf []byte) {
 	vin := Uint64(value)
 	var vout Uint64
 	bb := new(bytes.Buffer)
@@ -310,23 +312,23 @@ func testUint64(t *testing.T, value int, buf []byte) {
 	}
 }
 
-func TestBinaryUINT64Codec(t *testing.T) {
-	testUint64(t, 0, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-	testUint64(t, 1, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
-	testUint64(t, 2, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02})
-	testUint64(t, 127, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f})
-	testUint64(t, 128, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80})
-	testUint64(t, 129, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81})
-	testUint64(t, 16383, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff})
-	testUint64(t, 16384, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00})
-	testUint64(t, 16385, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01})
+func TestBinaryUint64(t *testing.T) {
+	testBinaryUint64(t, 0, []byte("\x00\x00\x00\x00\x00\x00\x00\x00"))
+	testBinaryUint64(t, 1, []byte("\x00\x00\x00\x00\x00\x00\x00\x01"))
+	testBinaryUint64(t, 2, []byte("\x00\x00\x00\x00\x00\x00\x00\x02"))
+	testBinaryUint64(t, 127, []byte("\x00\x00\x00\x00\x00\x00\x00\x7f"))
+	testBinaryUint64(t, 128, []byte("\x00\x00\x00\x00\x00\x00\x00\x80"))
+	testBinaryUint64(t, 129, []byte("\x00\x00\x00\x00\x00\x00\x00\x81"))
+	testBinaryUint64(t, 16383, []byte("\x00\x00\x00\x00\x00\x00\x3f\xff"))
+	testBinaryUint64(t, 16384, []byte("\x00\x00\x00\x00\x00\x00\x40\x00"))
+	testBinaryUint64(t, 16385, []byte("\x00\x00\x00\x00\x00\x00\x40\x01"))
 }
 
 ////////////////////////////////////////
 // Float32
 ////////////////////////////////////////
 
-func testFloat32(t *testing.T, value float64, buf []byte) {
+func testBinaryFloat32(t *testing.T, value float64, buf []byte) {
 	vin := Float32(value)
 	var vout Float32
 	bb := new(bytes.Buffer)
@@ -348,30 +350,30 @@ func testFloat32(t *testing.T, value float64, buf []byte) {
 	}
 }
 
-func TestBinaryFLOAT32Codec(t *testing.T) {
-	testFloat32(t, math.SmallestNonzeroFloat32, []byte{0x0, 0x0, 0x0, 0x1})
-	testFloat32(t, math.MaxFloat32, []byte{0x7f, 0x7f, 0xff, 0xff})
+func TestBinaryFloat32(t *testing.T) {
+	testBinaryFloat32(t, math.SmallestNonzeroFloat32, []byte("\x00\x00\x00\x01"))
+	testBinaryFloat32(t, math.MaxFloat32, []byte("\x7f\x7f\xff\xff"))
 
-	testFloat32(t, math.Sqrt2, []byte{0x3f, 0xb5, 0x4, 0xf3})
-	testFloat32(t, math.SqrtE, []byte{0x3f, 0xd3, 0x9, 0x4c})
-	testFloat32(t, math.SqrtPi, []byte{0x3f, 0xe2, 0xdf, 0xc5})
-	testFloat32(t, math.SqrtPhi, []byte{0x3f, 0xa2, 0xd1, 0x8a})
+	testBinaryFloat32(t, math.Sqrt2, []byte("\x3f\xb5\x04\xf3"))
+	testBinaryFloat32(t, math.SqrtE, []byte("\x3f\xd3\x09\x4c"))
+	testBinaryFloat32(t, math.SqrtPi, []byte("\x3f\xe2\xdf\xc5"))
+	testBinaryFloat32(t, math.SqrtPhi, []byte("\x3f\xa2\xd1\x8a"))
 
-	testFloat32(t, math.Ln2, []byte{0x3f, 0x31, 0x72, 0x18})
-	testFloat32(t, math.Log2E, []byte{0x3f, 0xb8, 0xaa, 0x3b})
-	testFloat32(t, math.Ln10, []byte{0x40, 0x13, 0x5d, 0x8e})
-	testFloat32(t, math.Log10E, []byte{0x3e, 0xde, 0x5b, 0xd9})
+	testBinaryFloat32(t, math.Ln2, []byte("\x3f\x31\x72\x18"))
+	testBinaryFloat32(t, math.Log2E, []byte("\x3f\xb8\xaa\x3b"))
+	testBinaryFloat32(t, math.Ln10, []byte("\x40\x13\x5d\x8e"))
+	testBinaryFloat32(t, math.Log10E, []byte("\x3e\xde\x5b\xd9"))
 
-	testFloat32(t, math.E, []byte{0x40, 0x2d, 0xf8, 0x54})
-	testFloat32(t, math.Phi, []byte{0x3f, 0xcf, 0x1b, 0xbd})
-	testFloat32(t, math.Pi, []byte{0x40, 0x49, 0xf, 0xdb})
+	testBinaryFloat32(t, math.E, []byte("\x40\x2d\xf8\x54"))
+	testBinaryFloat32(t, math.Phi, []byte("\x3f\xcf\x1b\xbd"))
+	testBinaryFloat32(t, math.Pi, []byte("\x40\x49\x0f\xdb"))
 }
 
 ////////////////////////////////////////
 // Float64
 ////////////////////////////////////////
 
-func testFloat64(t *testing.T, value float64, buf []byte) {
+func testBinaryFloat64(t *testing.T, value float64, buf []byte) {
 	vin := Float64(value)
 	var vout Float64
 	bb := new(bytes.Buffer)
@@ -393,30 +395,31 @@ func testFloat64(t *testing.T, value float64, buf []byte) {
 	}
 }
 
-func TestBinaryFLOAT64Codec(t *testing.T) {
-	testFloat64(t, math.SmallestNonzeroFloat64, []byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1})
-	testFloat64(t, math.MaxFloat64, []byte{0x7f, 0xef, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
+func TestBinaryFloat64(t *testing.T) {
+	testBinaryFloat64(t, math.SmallestNonzeroFloat64, []byte("\x00\x00\x00\x00\x00\x00\x00\x01"))
+	testBinaryFloat64(t, math.MaxFloat64, []byte("\x7f\xef\xff\xff\xff\xff\xff\xff"))
 
-	testFloat64(t, math.Sqrt2, []byte{0x3f, 0xf6, 0xa0, 0x9e, 0x66, 0x7f, 0x3b, 0xcd})
-	testFloat64(t, math.SqrtE, []byte{0x3f, 0xfa, 0x61, 0x29, 0x8e, 0x1e, 0x6, 0x9c})
-	testFloat64(t, math.SqrtPi, []byte{0x3f, 0xfc, 0x5b, 0xf8, 0x91, 0xb4, 0xef, 0x6b})
-	testFloat64(t, math.SqrtPhi, []byte{0x3f, 0xf4, 0x5a, 0x31, 0x46, 0xa8, 0x84, 0x56})
+	testBinaryFloat64(t, math.Sqrt2, []byte("\x3f\xf6\xa0\x9e\x66\x7f\x3b\xcd"))
+	testBinaryFloat64(t, math.SqrtE, []byte("\x3f\xfa\x61\x29\x8e\x1e\x06\x9c"))
+	testBinaryFloat64(t, math.SqrtPi, []byte("\x3f\xfc\x5b\xf8\x91\xb4\xef\x6b"))
+	testBinaryFloat64(t, math.SqrtPhi, []byte("\x3f\xf4\x5a\x31\x46\xa8\x84\x56"))
 
-	testFloat64(t, math.Ln2, []byte{0x3f, 0xe6, 0x2e, 0x42, 0xfe, 0xfa, 0x39, 0xef})
-	testFloat64(t, math.Log2E, []byte{0x3f, 0xf7, 0x15, 0x47, 0x65, 0x2b, 0x82, 0xfe})
-	testFloat64(t, math.Ln10, []byte{0x40, 0x2, 0x6b, 0xb1, 0xbb, 0xb5, 0x55, 0x16})
-	testFloat64(t, math.Log10E, []byte{0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0xe})
+	testBinaryFloat64(t, math.Ln2, []byte("\x3f\xe6\x2e\x42\xfe\xfa\x39\xef"))
+	testBinaryFloat64(t, math.Log2E, []byte("\x3f\xf7\x15\x47\x65\x2b\x82\xfe"))
+	testBinaryFloat64(t, math.Ln10, []byte("\x40\x02\x6b\xb1\xbb\xb5\x55\x16"))
+	testBinaryFloat64(t, math.Log10E, []byte("\x3f\xdb\xcb\x7b\x15\x26\xe5\x0e"))
 
-	testFloat64(t, math.E, []byte{0x40, 0x5, 0xbf, 0xa, 0x8b, 0x14, 0x57, 0x69})
-	testFloat64(t, math.Phi, []byte{0x3f, 0xf9, 0xe3, 0x77, 0x9b, 0x97, 0xf4, 0xa8})
-	testFloat64(t, math.Pi, []byte{0x40, 0x9, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18})
+	testBinaryFloat64(t, math.E, []byte("\x40\x05\xbf\x0a\x8b\x14\x57\x69"))
+	testBinaryFloat64(t, math.Phi, []byte("\x3f\xf9\xe3\x77\x9b\x97\xf4\xa8"))
+	testBinaryFloat64(t, math.Pi, []byte("\x40\x09\x21\xfb\x54\x44\x2d\x18"))
 }
 
 ////////////////////////////////////////
 // VWI -- signed variable width integer
 ////////////////////////////////////////
 
-func testVWICodec(t *testing.T, value int, buf []byte) {
+func testBinaryVWI(t *testing.T, value int, buf []byte) {
+	// ensure works for both io.Reader & io.Writer, and io.ByteReader & io.ByteWriter
 	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := VWI(value)
 		var vout VWI
@@ -444,33 +447,37 @@ func testVWICodec(t *testing.T, value int, buf []byte) {
 	test(t, value, buf, new(bytes.Buffer))
 }
 
-func TestBinaryVWICodecOneByte(t *testing.T) {
-	testVWICodec(t, 0, []byte{0x00})
-	testVWICodec(t, -1, []byte{0x01})
-	testVWICodec(t, 1, []byte{0x02})
-	testVWICodec(t, -2, []byte{0x03})
-	testVWICodec(t, 2, []byte{0x04})
-	testVWICodec(t, -3, []byte{0x05})
-	testVWICodec(t, 3, []byte{0x06})
+func TestBinaryVWIOneByte(t *testing.T) {
+	testBinaryVWI(t, 0, []byte("\x00"))
+	testBinaryVWI(t, -1, []byte("\x01"))
+	testBinaryVWI(t, 1, []byte("\x02"))
+	testBinaryVWI(t, -2, []byte("\x03"))
+	testBinaryVWI(t, 2, []byte("\x04"))
+	testBinaryVWI(t, -3, []byte("\x05"))
+	testBinaryVWI(t, 3, []byte("\x06"))
+	testBinaryVWI(t, -63, []byte("\x7d"))
+	testBinaryVWI(t, 63, []byte("\x7e"))
+	testBinaryVWI(t, -64, []byte("\x7f"))
 }
 
-func TestBinaryVWICodecMultipleBytes(t *testing.T) {
-	testVWICodec(t, 64, []byte{0x80, 0x01})
-	testVWICodec(t, -65, []byte{0x81, 0x01})
-
-	testVWICodec(t, 2147483647, []byte("\xfe\xff\xff\xff\x0f"))
-	testVWICodec(t, -2147483648, []byte("\xff\xff\xff\xff\x0f"))
-	testVWICodec(t, 1082196484, []byte("\x88\x88\x88\x88\x08"))
-	testVWICodec(t, 138521149956, []byte("\x88\x88\x88\x88\x88\x08"))
-	testVWICodec(t, 17730707194372, []byte("\x88\x88\x88\x88\x88\x88\x08"))
-	testVWICodec(t, 2269530520879620, []byte("\x88\x88\x88\x88\x88\x88\x88\x08"))
+func TestBinaryVWIMultipleBytes(t *testing.T) {
+	testBinaryVWI(t, 64, []byte("\x80\x01"))
+	testBinaryVWI(t, -65, []byte("\x81\x01"))
+	testBinaryVWI(t, 65, []byte("\x82\x01"))
+	testBinaryVWI(t, 2147483647, []byte("\xfe\xff\xff\xff\x0f"))
+	testBinaryVWI(t, -2147483648, []byte("\xff\xff\xff\xff\x0f"))
+	testBinaryVWI(t, 1082196484, []byte("\x88\x88\x88\x88\x08"))
+	testBinaryVWI(t, 138521149956, []byte("\x88\x88\x88\x88\x88\x08"))
+	testBinaryVWI(t, 17730707194372, []byte("\x88\x88\x88\x88\x88\x88\x08"))
+	testBinaryVWI(t, 2269530520879620, []byte("\x88\x88\x88\x88\x88\x88\x88\x08"))
 }
 
 ////////////////////////////////////////
 // UVWI -- unsigned variable width integer
 ////////////////////////////////////////
 
-func testUVWICodec(t *testing.T, value int, buf []byte) {
+func testBinaryUVWI(t *testing.T, value int, buf []byte) {
+	// ensure works for both io.Reader & io.Writer, and io.ByteReader & io.ByteWriter
 	test := func(t *testing.T, value int, buf []byte, scratch testBuffer) {
 		vin := UVWI(value)
 		var vout UVWI
@@ -498,110 +505,139 @@ func testUVWICodec(t *testing.T, value int, buf []byte) {
 	test(t, value, buf, new(bytes.Buffer))
 }
 
-func TestBinaryUVWICodecOneByte(t *testing.T) {
-	testUVWICodec(t, 0, []byte{0x00})
-	testUVWICodec(t, 1, []byte{0x01})
-	testUVWICodec(t, 2, []byte{0x02})
-	testUVWICodec(t, 127, []byte{0x7f})
+func TestBinaryUVWIOneByte(t *testing.T) {
+	testBinaryUVWI(t, 0, []byte("\x00"))
+	testBinaryUVWI(t, 1, []byte("\x01"))
+	testBinaryUVWI(t, 2, []byte("\x02"))
+	testBinaryUVWI(t, 127, []byte("\x7f"))
 }
 
-func TestBinaryUVWICodecMultipleBytes(t *testing.T) {
-	testUVWICodec(t, 0x7F, []byte{0x7F})
-	testUVWICodec(t, 0x80, []byte{0x80, 0x01})
-	testUVWICodec(t, 0x81, []byte{0x81, 0x01})
+func TestBinaryUVWIMultipleBytes(t *testing.T) {
+	testBinaryUVWI(t, 0x7F, []byte("\x7F"))
+	testBinaryUVWI(t, 0x80, []byte("\x80\x01"))
+	testBinaryUVWI(t, 0x81, []byte("\x81\x01"))
 
-	testUVWICodec(t, 0x00003FFF, []byte{0xFF, 0x7F})
-	testUVWICodec(t, 0x00004000, []byte{0x80, 0x80, 0x01})
-	testUVWICodec(t, 0x00004001, []byte{0x81, 0x80, 0x01})
+	testBinaryUVWI(t, 0x00003FFF, []byte("\xFF\x7F"))
+	testBinaryUVWI(t, 0x00004000, []byte("\x80\x80\x01"))
+	testBinaryUVWI(t, 0x00004001, []byte("\x81\x80\x01"))
 
-	testUVWICodec(t, 0x001FFFFF, []byte{0xFF, 0xFF, 0x7F})
-	testUVWICodec(t, 0x00200000, []byte{0x80, 0x80, 0x80, 0x01})
-	testUVWICodec(t, 0x00200001, []byte{0x81, 0x80, 0x80, 0x01})
+	testBinaryUVWI(t, 0x001FFFFF, []byte("\xFF\xFF\x7F"))
+	testBinaryUVWI(t, 0x00200000, []byte("\x80\x80\x80\x01"))
+	testBinaryUVWI(t, 0x00200001, []byte("\x81\x80\x80\x01"))
 
-	testUVWICodec(t, 0x0FFFFFFF, []byte{0xFF, 0xFF, 0xFF, 0x7F})
-	testUVWICodec(t, 0x10000000, []byte{0x80, 0x80, 0x80, 0x80, 0x01})
-	testUVWICodec(t, 0x10000001, []byte{0x81, 0x80, 0x80, 0x80, 0x01})
+	testBinaryUVWI(t, 0x0FFFFFFF, []byte("\xFF\xFF\xFF\x7F"))
+	testBinaryUVWI(t, 0x10000000, []byte("\x80\x80\x80\x80\x01"))
+	testBinaryUVWI(t, 0x10000001, []byte("\x81\x80\x80\x80\x01"))
 }
 
-func TestBinaryUVWICodecSigned(t *testing.T) {
-	// testInt8(t, 0, []byte{0x00})
-	// testInt8(t, -1, []byte{0x01})
-	// testInt8(t, 1, []byte{0x02})
-	// testInt8(t, -2, []byte{0x03})
-	// testInt8(t, 2, []byte{0x04})
-	// testInt8(t, -3, []byte{0x05})
-	// testInt8(t, 3, []byte{0x06})
-}
+////////////////////////////////////////
 
-func BenchmarkUVWIBuffer(b *testing.B) {
-	benchmarkUVWI(b, new(buffer.Buffer))
-}
-
-func BenchmarkUVWIBytes(b *testing.B) {
-	benchmarkUVWI(b, new(bytes.Buffer))
-}
-
-func benchmarkUVWI(b *testing.B, scratch testBuffer) {
-	const largeUVWIValue = 0x0FFFFFFF
-	vin := UVWI(largeUVWIValue)
-	var vout UVWI
-
+func benchmarkCodec(b *testing.B, scratch testBuffer, vin, vout Binary) {
 	for i := 0; i < b.N; i++ {
 		if err := vin.MarshalBinaryTo(scratch); err != nil {
 			b.Fatal(err)
 		}
 		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
 			b.Fatal(err)
-		}
-		if actual, expected := vout, vin; actual != expected {
-			b.Fatalf("Actual: %#v; Expected: %#v", actual, expected)
 		}
 	}
 }
 
 ////////////////////////////////////////
+// relative difference between using io.ByteReader and io.ByteWriter vs. io.Reader and io.Writer.
 
-func BenchmarkTwoBytesUINT16(b *testing.B) {
-	vin := Uint16(0x00003FFF) // largest integer that can be stored in 2 bytes UVWI
-	var vout Uint16
-	scratch := new(buffer.Buffer) // ensure not using ByteReader ByteWriter optimization
-
-	for i := 0; i < b.N; i++ {
-		if err := vin.MarshalBinaryTo(scratch); err != nil {
-			b.Fatal(err)
-		}
-		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
-			b.Fatal(err)
-		}
-		if actual, expected := vout, vin; actual != expected {
-			b.Fatalf("Actual: %#v; Expected: %#v", actual, expected)
-		}
-	}
+func BenchmarkBinaryBinaryBuffer(b *testing.B) {
+	scratch := new(buffer.Buffer)
+	vin := UVWI(0xFFFFFFFFFFFFFFFF)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
 }
 
-func BenchmarkTwoBytesUVWI(b *testing.B) {
-	vin := UVWI(0x00003FFF) // largest integer that can be stored in 2 bytes UVWI
+func BenchmarkBinaryBinaryBytes(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(0xFFFFFFFFFFFFFFFF)
 	var vout UVWI
-	scratch := new(buffer.Buffer) // ensure not using ByteReader ByteWriter optimization
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
 
-	for i := 0; i < b.N; i++ {
-		if err := vin.MarshalBinaryTo(scratch); err != nil {
-			b.Fatal(err)
-		}
-		if err := vout.UnmarshalBinaryFrom(scratch); err != nil {
-			b.Fatal(err)
-		}
-		if actual, expected := vout, vin; actual != expected {
-			b.Fatalf("Actual: %#v; Expected: %#v", actual, expected)
-		}
-	}
+////////////////////////////////////////
+// relative differences between integers of different lengths
+
+func BenchmarkBinaryOneByteFixed(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := Uint8(1)
+	var vout Uint8
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryOneByteVariable(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(1)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryTwoBytesFixed(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := Uint16(0x80)
+	var vout Uint16
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryTwoBytesVariable(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(0x80)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryThreeBytesFixed(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := Uint32(0x00004000) // must use 4 bytes fixed to encode 3 bytes
+	var vout Uint32
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryThreeBytesVariable(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(0x00004000)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryFourBytesFixed(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := Uint32(0x00200000)
+	var vout Uint32
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryFourBytesVariable(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(0x00200000)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryEightBytesFixed(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := Uint64(0xFFFFFFFFFFFFFFFF)
+	var vout Uint64
+	benchmarkCodec(b, scratch, &vin, &vout)
+}
+
+func BenchmarkBinaryEightBytesVariable(b *testing.B) {
+	scratch := new(bytes.Buffer)
+	vin := UVWI(0xFFFFFFFFFFFFFFFF)
+	var vout UVWI
+	benchmarkCodec(b, scratch, &vin, &vout)
 }
 
 ////////////////////////////////////////
 // String
 ////////////////////////////////////////
 
-func testStringCodec(t *testing.T, value string, buf []byte) {
+func testBinaryString(t *testing.T, value string, buf []byte) {
 	vin := String(value)
 	var vout String
 	bb := new(bytes.Buffer)
@@ -623,18 +659,18 @@ func testStringCodec(t *testing.T, value string, buf []byte) {
 	}
 }
 
-func TestBinaryStringCodec(t *testing.T) {
-	testStringCodec(t, "", []byte{0x0})
-	testStringCodec(t, "short", []byte{0x05, 's', 'h', 'o', 'r', 't'})
-	testStringCodec(t, "this is a slightly longer message",
-		append([]byte{0x21}, []byte("this is a slightly longer message")...))
+func TestBinaryString(t *testing.T) {
+	testBinaryString(t, "", []byte("\x00"))
+	testBinaryString(t, "short", []byte("\x05short"))
+	testBinaryString(t, "this is a slightly longer message",
+		[]byte("\x21this is a slightly longer message"))
 }
 
 ////////////////////////////////////////
 // StringSlice
 ////////////////////////////////////////
 
-func testStringSliceCodec(t *testing.T, value []String, buf []byte) {
+func testBinaryStringSlice(t *testing.T, value []String, buf []byte) {
 	vin := StringSlice(value)
 	var vout StringSlice
 	bb := new(bytes.Buffer)
@@ -661,14 +697,9 @@ func testStringSliceCodec(t *testing.T, value []String, buf []byte) {
 	}
 }
 
-func TestBinaryStringSliceCodec(t *testing.T) {
-	testStringSliceCodec(t, StringSlice{}, []byte{0x0})
-	testStringSliceCodec(t, StringSlice{String("one")},
-		append([]byte{0x1, 0x3}, []byte("one")...))
-	testStringSliceCodec(t, StringSlice{String("one"), String("two")},
-		[]byte{
-			0x2,
-			0x3, 'o', 'n', 'e',
-			0x3, 't', 'w', 'o',
-		})
+func TestBinaryStringSlice(t *testing.T) {
+	testBinaryStringSlice(t, StringSlice{}, []byte("\x00"))
+	testBinaryStringSlice(t, StringSlice{String("one")}, []byte("\x01\x03one"))
+	testBinaryStringSlice(t, StringSlice{String("one"), String("two")},
+		[]byte("\x02\x03one\x03two"))
 }
