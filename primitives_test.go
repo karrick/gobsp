@@ -546,14 +546,14 @@ func benchmarkCodec(b *testing.B, scratch testBuffer, vin, vout Binary) {
 ////////////////////////////////////////
 // relative difference between using io.ByteReader and io.ByteWriter vs. io.Reader and io.Writer.
 
-func BenchmarkBinaryBinaryBuffer(b *testing.B) {
+func BenchmarkBinaryBuffer(b *testing.B) {
 	scratch := new(buffer.Buffer)
 	vin := UVWI(0xFFFFFFFFFFFFFFFF)
 	var vout UVWI
 	benchmarkCodec(b, scratch, &vin, &vout)
 }
 
-func BenchmarkBinaryBinaryBytes(b *testing.B) {
+func BenchmarkBinaryBytes(b *testing.B) {
 	scratch := new(bytes.Buffer)
 	vin := UVWI(0xFFFFFFFFFFFFFFFF)
 	var vout UVWI
@@ -587,20 +587,6 @@ func BenchmarkBinaryTwoBytesFixed(b *testing.B) {
 func BenchmarkBinaryTwoBytesVariable(b *testing.B) {
 	scratch := new(bytes.Buffer)
 	vin := UVWI(0x80)
-	var vout UVWI
-	benchmarkCodec(b, scratch, &vin, &vout)
-}
-
-func BenchmarkBinaryThreeBytesFixed(b *testing.B) {
-	scratch := new(bytes.Buffer)
-	vin := Uint32(0x00004000) // must use 4 bytes fixed to encode 3 bytes
-	var vout Uint32
-	benchmarkCodec(b, scratch, &vin, &vout)
-}
-
-func BenchmarkBinaryThreeBytesVariable(b *testing.B) {
-	scratch := new(bytes.Buffer)
-	vin := UVWI(0x00004000)
 	var vout UVWI
 	benchmarkCodec(b, scratch, &vin, &vout)
 }
