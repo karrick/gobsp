@@ -509,6 +509,7 @@ func TestBinaryUVWIOneByte(t *testing.T) {
 	testBinaryUVWI(t, 0, []byte("\x00"))
 	testBinaryUVWI(t, 1, []byte("\x01"))
 	testBinaryUVWI(t, 2, []byte("\x02"))
+	testBinaryUVWI(t, 3, []byte("\x03"))
 	testBinaryUVWI(t, 127, []byte("\x7f"))
 }
 
@@ -648,6 +649,7 @@ func testBinaryString(t *testing.T, value string, buf []byte) {
 func TestBinaryString(t *testing.T) {
 	testBinaryString(t, "", []byte("\x00"))
 	testBinaryString(t, "short", []byte("\x05short"))
+	testBinaryString(t, "data0", []byte("\x05data0"))
 	testBinaryString(t, "this is a slightly longer message",
 		[]byte("\x21this is a slightly longer message"))
 }

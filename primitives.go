@@ -425,8 +425,7 @@ func (v Float64) String() string {
 type String string
 
 func (v String) MarshalBinaryTo(iow io.Writer) error {
-	size := UVWI(len(string(v)))
-	if err := size.MarshalBinaryTo(iow); err != nil {
+	if err := UVWI(len(string(v))).MarshalBinaryTo(iow); err != nil {
 		return err
 	}
 	_, err := io.WriteString(iow, string(v))

@@ -44,15 +44,16 @@ func TestBinaryScannerEOF(t *testing.T) {
 }
 
 func TestBinaryScannerHandleReturnsHandlerError(t *testing.T) {
-	bb := bytes.NewBuffer([]byte{
-		0x00, 0x00, 0x01, 0x00,
+	bb := bytes.NewReader([]byte{
+		0x00, 0x02 /* payload: */, 0xDE, 0xAD,
+		0x01, 0x02 /* payload: */, 0xBE, 0xEF,
 	})
 
 	handlers := map[uint32]MessageHandler{
-		0x00: func(io.Reader) error {
-			return io.EOF
+		0: func(io.Reader) error {
+			return io.ErrNoProgress // some dummy token error
 		},
-		0x01: func(io.Reader) error {
+		1: func(io.Reader) error {
 			return nil
 		},
 	}
@@ -62,14 +63,18 @@ func TestBinaryScannerHandleReturnsHandlerError(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// First scan
 	ensure(t, scanner.Scan(), true)
-	ensure(t, scanner.Handle(), io.EOF)
+	ensure(t, scanner.Handle(), io.ErrNoProgress)
+	ensure(t, scanner.Err(), error(nil))
 
+	// Second scan
 	ensure(t, scanner.Scan(), true)
-	ensure(t, scanner.Handle(), nil)
+	ensure(t, scanner.Handle(), error(nil))
 
+	// Third scan
 	ensure(t, scanner.Scan(), false)
-	ensure(t, scanner.Err(), nil)
+	ensure(t, scanner.Handle(), error(nil))
 }
 
 func TestBinaryScannerHandleUnknownMessageTypeWithoutDefaultHandler(t *testing.T) {
@@ -80,7 +85,7 @@ func TestBinaryScannerHandleUnknownMessageTypeWithoutDefaultHandler(t *testing.T
 	})
 
 	handlers := map[uint32]MessageHandler{
-		0x00: func(ior io.Reader) error {
+		0: func(ior io.Reader) error {
 			return nil
 		},
 	}
@@ -94,7 +99,7 @@ func TestBinaryScannerHandleUnknownMessageTypeWithoutDefaultHandler(t *testing.T
 	ensure(t, scanner.Handle(), nil)
 
 	ensure(t, scanner.Scan(), true)
-	ensure(t, scanner.Handle(), ErrUnknownMessageType(0x01))
+	ensure(t, scanner.Handle(), ErrUnknownMessageType(1))
 
 	ensure(t, scanner.Scan(), false) // ??? b/c it remembers error ???
 	ensure(t, scanner.Err(), ErrUnknownMessageType(0x01))
@@ -108,7 +113,7 @@ func TestBinaryScannerHandleUnknownMessageTypeWithDefaultHandler(t *testing.T) {
 	})
 
 	handlers := map[uint32]MessageHandler{
-		0x00: func(ior io.Reader) error {
+		0: func(ior io.Reader) error {
 			return nil
 		},
 	}
@@ -141,11 +146,10 @@ func TestBinaryScannerHandleForgetsToConsumeAll(t *testing.T) {
 	})
 
 	handlers := map[uint32]MessageHandler{
-		0x00: func(ior io.Reader) error {
-			DiscardAll(ior)
+		0: func(ior io.Reader) error {
 			return nil
 		},
-		0x01: func(ior io.Reader) error {
+		1: func(ior io.Reader) error {
 			// read a few of the bytes, but not all of them
 			buf := make([]byte, 2)
 			io.ReadFull(ior, buf)
